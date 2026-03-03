@@ -27,6 +27,8 @@ public class Usuario {
     @Column(updatable = false, unique = true)
     private UUID id;
 
+    private String keycloakId;
+
     @NotBlank
     @Size(min = 5, max = 120)
     @Pattern(regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ]{2,}(?:\\s+[A-Za-zÀ-ÖØ-öø-ÿ]{2,})+$",

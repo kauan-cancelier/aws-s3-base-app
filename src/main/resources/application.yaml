@@ -21,10 +21,26 @@ spring:
     init:
       mode: never
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/base-app-realm
+
 server:
-  port: 8080
+  port: 8100
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+
+keycloak:
+  auth-server-url: http://localhost:8081/realms/base-app-realm
+  admin-server-url: http://localhost:8081/admin/realms/base-app-realm
+  master-server-url: http://localhost:8081/realms/master
+  client-id: base-app-realm
+  client-secret: NFTIiTo6RB0Q892xg5nmtPehFRxW7iQr
+  admin-username: admin
+  admin-password: admin
