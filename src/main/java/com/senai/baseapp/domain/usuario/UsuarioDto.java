@@ -13,4 +13,5 @@ public class UsuarioDto {
     private UUID id;
     private String nomeCompleto;
     private String email;
+    private String fotoKey;
 }
