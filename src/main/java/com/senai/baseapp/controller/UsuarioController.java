@@ -25,52 +25,63 @@ public class UsuarioController {
     private final UsuarioMapper usuarioMapper;
     private final UsuarioComponent usuarioComponent;
 
+    @PostMapping
+    public ResponseEntity<UsuarioDto> criarConta(@RequestBody UsuarioDto dadosCriacao) {
+        UsuarioDto resultado = usuarioComponent.criarUsuarioComFoto(dadosCriacao);
+        return ResponseEntity.ok(resultado);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UsuarioDto> criarConta(@RequestPart("nomeCompleto") String nomeCompleto, @RequestPart("email") String email, @RequestPart("senha") String senha, @RequestPart(value = "file", required = false) MultipartFile file) {
-        UsuarioDto usuarioDto = UsuarioDto.builder()
-                .nomeCompleto(nomeCompleto)
-                .email(email)
-                .senha(senha)
-                .file(file)
-                .build();
-        
-        UsuarioDto result = usuarioComponent.criarUsuarioComFoto(usuarioDto);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<UsuarioDto> criarContaComFoto(@RequestPart("nomeCompleto") String nomeCompleto, @RequestPart("email") String email, @RequestPart("senha") String senha, @RequestPart(value = "file", required = false) MultipartFile arquivo) {
+        UsuarioDto usuarioDto = construirUsuarioDtoComFoto(nomeCompleto, email, senha, arquivo);
+        UsuarioDto resultado = usuarioComponent.criarUsuarioComFoto(usuarioDto);
+        return ResponseEntity.ok(resultado);
     }
 
 
-    @PostMapping("/{id}/photo")
-    public ResponseEntity<String> uploadPhoto(@PathVariable String id, @RequestParam("file") MultipartFile file) {
-        String key = usuarioComponent.uploadFotoUsuario(id, file);
-        return ResponseEntity.ok(key);
+    @PostMapping("/{id}/foto")
+    public ResponseEntity<String> fazerUploadFoto(
+            @PathVariable String id, 
+            @RequestParam("file") MultipartFile arquivo) {
+        
+        String chaveFoto = usuarioComponent.fazerUploadFotoUsuario(id, arquivo);
+        return ResponseEntity.ok(chaveFoto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDto> getUsuario(@PathVariable String id) {
-        UsuarioDto usuarioDto = usuarioComponent.obterUsuarioComFoto(id);
+    public ResponseEntity<UsuarioDto> buscarUsuarioPorId(@PathVariable String id) {
+        UsuarioDto usuarioDto = usuarioComponent.buscarUsuarioPorId(id);
         return ResponseEntity.ok(usuarioDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDto> updateUsuario(
+    public ResponseEntity<UsuarioDto> atualizarUsuario(
             @PathVariable String id, 
-            @Valid @RequestBody ContaInicialDto contaInicialDto) {
+            @Valid @RequestBody ContaInicialDto dadosAtualizados) {
         
-        UsuarioDto usuarioDto = usuarioComponent.atualizarUsuarioComFoto(id, contaInicialDto);
+        UsuarioDto usuarioDto = usuarioComponent.atualizarDadosUsuario(id, dadosAtualizados);
         return ResponseEntity.ok(usuarioDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUsuario(@PathVariable String id) {
+    public ResponseEntity<Void> excluirUsuario(@PathVariable String id) {
         usuarioService.deleteById(UUID.fromString(id));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<Page<UsuarioDto>> listarPagina(@PageableDefault Pageable pageable) {
-        Page<Usuario> usuarios = usuarioService.listarPagina(pageable);
+    public ResponseEntity<Page<UsuarioDto>> listarUsuarios(@PageableDefault Pageable paginacao) {
+        Page<Usuario> usuarios = usuarioService.listarPagina(paginacao);
         Page<UsuarioDto> usuariosDto = usuarios.map(usuarioMapper::toDTO);
         return ResponseEntity.ok(usuariosDto);
     }
 
+    private UsuarioDto construirUsuarioDtoComFoto(String nomeCompleto, String email, String senha, MultipartFile arquivo) {
+        return UsuarioDto.builder()
+                .nomeCompleto(nomeCompleto)
+                .email(email)
+                .senha(senha)
+                .file(arquivo)
+                .build();
+    }
 }
