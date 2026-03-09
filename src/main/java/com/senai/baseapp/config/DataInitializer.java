@@ -5,7 +5,6 @@ import com.senai.baseapp.domain.permission.PermissionRepository;
 import com.senai.baseapp.domain.permission.Role;
 import com.senai.baseapp.domain.permission.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +16,11 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(RoleRepository roleRepository, 
-                          PermissionRepository permissionRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PermissionRepository permissionRepository) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

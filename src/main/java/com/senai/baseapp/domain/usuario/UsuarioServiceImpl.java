@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,16 +16,10 @@ import java.util.UUID;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository repo;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Usuario salvar(Usuario usuario) {
         try {
-            if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) {
-                usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-                log.debug("Password encoded for user: {}", usuario.getEmail());
-            }
-            
             Usuario savedUsuario = repo.save(usuario);
             log.info("User saved successfully: {}", savedUsuario.getEmail());
             return savedUsuario;
