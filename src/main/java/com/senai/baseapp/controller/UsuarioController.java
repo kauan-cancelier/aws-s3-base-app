@@ -27,8 +27,15 @@ public class UsuarioController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UsuarioDto> criarConta(@RequestPart("nomeCompleto") String nomeCompleto, @RequestPart("email") String email, @RequestPart("senha") String senha, @RequestPart(value = "file", required = false) MultipartFile file) {
-        UsuarioDto usuarioDto = usuarioComponent.criarUsuarioComFoto(nomeCompleto, email, senha, file);
-        return ResponseEntity.ok(usuarioDto);
+        UsuarioDto usuarioDto = UsuarioDto.builder()
+                .nomeCompleto(nomeCompleto)
+                .email(email)
+                .senha(senha)
+                .file(file)
+                .build();
+        
+        UsuarioDto result = usuarioComponent.criarUsuarioComFoto(usuarioDto);
+        return ResponseEntity.ok(result);
     }
 
 

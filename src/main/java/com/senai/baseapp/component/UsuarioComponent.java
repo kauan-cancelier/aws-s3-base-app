@@ -1,11 +1,9 @@
 package com.senai.baseapp.component;
 
-import com.senai.baseapp.aws.S3Service;
 import com.senai.baseapp.domain.usuario.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -16,33 +14,30 @@ public class UsuarioComponent {
 
     private final UsuarioService usuarioService;
     private final UsuarioMapper usuarioMapper;
-    private final S3Service s3Service;
+    private final PhotoUploadComponent photoUploadComponent;
 
-    public UsuarioDto criarUsuarioComFoto(String nomeCompleto, String email, String senha, MultipartFile file) {
+    public UsuarioDto criarUsuarioComFoto(UsuarioDto usuarioDto) {
         ContaInicialDto contaInicialDto = ContaInicialDto.builder()
-                .nomeCompleto(nomeCompleto)
-                .email(email)
-                .senha(senha)
+                .nomeCompleto(usuarioDto.getNomeCompleto())
+                .email(usuarioDto.getEmail())
+                .senha(usuarioDto.getSenha())
                 .build();
 
         var usuario = usuarioService.salvar(ContaInicialMapper.contaInicialParaUsuario(contaInicialDto));
 
-        if (file != null && !file.isEmpty()) {
-            String photoKey = s3Service.uploadFile(file, usuario.getId().toString());
-            usuario.setFotoKey(photoKey);
-            usuario = usuarioService.salvar(usuario);
-            log.info("Profile photo uploaded for user: {}", usuario.getId());
+        if (usuarioDto.getFile() != null && !usuarioDto.getFile().isEmpty()) {
+            photoUploadComponent.uploadPhotoAndUpdateUser(usuarioDto.getFile(), usuario.getId().toString());
         }
 
-        UsuarioDto usuarioDto = usuarioMapper.toDTO(usuario);
-        setPhotoKeyIfExists(usuario, usuarioDto);
+        UsuarioDto result = usuarioMapper.toDTO(usuario);
+        setPhotoKeyIfExists(usuario, result);
         
-        log.info("User account created successfully for email: {}", email);
-        return usuarioDto;
+        log.info("User account created successfully for email: {}", usuarioDto.getEmail());
+        return result;
     }
 
-    public String uploadFotoUsuario(String id, MultipartFile file) {
-        return s3Service.uploadFile(file, id);
+    public String uploadFotoUsuario(String id, org.springframework.web.multipart.MultipartFile file) {
+        return photoUploadComponent.uploadPhotoOnly(file, id);
     }
 
     public UsuarioDto obterUsuarioComFoto(String id) {
